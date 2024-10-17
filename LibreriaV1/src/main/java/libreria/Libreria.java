@@ -1,74 +1,66 @@
 package libreria;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 
 /// @author Juan Marcos Requena
- /// @version 1.0
+ /// @version 2.0
 
 public class Libreria {
-    private Libro[] libros; // Todavia no tengo ningun array esto es un gancho que me permite coger un array de libro
-    private int num_Libros;
-    private static final int TAM_DEFECTO = 16; // Es una constante final, se escriben en mayuscula en general
+    private List<Libro> libros; // Todavia no tengo ningun array esto es un gancho que me permite coger un array de libro
 
-    /// Constructor de libros
-    public Libreria() {
-        this(TAM_DEFECTO); // Llama al de abajo y define un libro usando el de abajo con tamaño = TAM_DEFECTO
+    /// Crea una libreria.
+    public Libreria(){
+        libros = new ArrayList<Libro>();
     }
 
-    /// Constructir de libros con otro posible tamaño
-    public Libreria(int tam){
-        libros = new Libro[tam];
-        num_Libros = 0;
-    }
-
+    /// Agrega un libro a la libreria
     public void addLibro(String autor, String titulo, double precioBase){
         Libro libro = new Libro(autor, titulo, precioBase);
         addLibro(libro);
     }
 
+    /// Agrega un libro a la lista de libros
+    /// - Si ya está se sustituye.
+    /// - Si no está se añade
+    /// @param libro a agregar
     private void addLibro(Libro libro){
         int pos = posicionLibro(libro.getAutor(), libro.getTitulo());
         if (pos < 0){
-            // El libro no está, hay que añadirlo pero antes compruebo si la libreria está o no llena
-            aseguraQueCabe();
-            libros[num_Libros] = libro;
-            num_Libros++;
-        } else {
-            libros[pos] = libro;
+            libros.add(libro);
+        } else { // El libro está.
+            libros.set(pos,libro); // Cambio el libro que hay en esa posición por `libro`.
         }
     }
 
+    /// Localiza la posición de un libro con `autor`
     /// Me devuelve en qué posición está el libro
     /// Si devuelve -1 es que no está
-
+    /// @return  la posición del libro en el array
     private int posicionLibro(String autor, String titulo){
         int pos = 0;
 
         // Se coge un while porque el bucle puede que pare antes
-        while (pos < num_Libros &&
-                (!libros[pos].getTitulo().equalsIgnoreCase(titulo)
-                 || !libros[pos].getAutor().equalsIgnoreCase(autor)))
+        while (pos < libros.size() &&
+                (!libros.get(pos).getTitulo().equalsIgnoreCase(titulo) // libors.get(pos): me da el libro que está en esa posición.
+                 || !libros.get(pos).getAutor().equalsIgnoreCase(autor)))
                 pos++;
 
         // Muy importante entenderlo este return operador ternario
-        return (pos == num_Libros)? - 1 : pos; // Si es cierto lo de dentro enseña -1 y sino enseña pos
+        return (pos == libros.size())? - 1 : pos; // Si es cierto lo de dentro enseña -1 y sino enseña pos
     }
 
-    private void aseguraQueCabe(){
-        if (num_Libros == libros.length){
-            libros = Arrays.copyOf(libros, num_Libros*2); //Cojo el array libros y lo copio a otro arrray con longituf doble
-        }
-    }
-
+    /// Calcula el precio de base de un libro conocido `autor`
     public double getPrecioBase(String autor, String titulo) {
         int pos = posicionLibro(autor, titulo);
-        return (pos < 0)? 0 : libros[pos].getPrecioBase(); // pos<0? si lo es devuelve 0 sino devuelve lo otro
+        return (pos < 0)? 0 : libros.get(pos).getPrecioBase(); // pos<0? si lo es devuelve 0 sino devuelve lo otro
     }
 
+    /// Calcula el precio de base de un libro conocido `autor`
+    ///
     public double getPrecioFinal(String autor, String titulo) {
         int pos = posicionLibro(autor, titulo);
-        return (pos < 0)? 0 : libros[pos].getPrecioFinal(); // pos<0? si lo es devuelve 0 sino devuelve lo otro
+        return (pos < 0)? 0 : libros.get(pos).getPrecioFinal(); // pos<0? si lo es devuelve 0 sino devuelve lo otro
     }
 
     /// Elimina un libro de la librería conocido `autor` y `titulo.
@@ -77,24 +69,12 @@ public class Libreria {
     /// @param titulo del libro
     public void remLibro(String autor, String titulo){
         int pos = posicionLibro(autor, titulo);
-        if (pos >= 0) { // El libro está si no está no hago nada
-            for (int i = pos; i < num_Libros - 1; i++){
-                libros[i] = libros[i+1]; // Cada libro a partir de pos, el que está en pos+2 lo pongo en pos+1 etc
-            }
-            num_Libros--;
-            libros[num_Libros] = null; // Ya no hay libro en esta posición, esa copia la quito de ahí
-        }
+        if (pos >= 0)  // El libro está
+            libros.remove(pos);
     }
 
     @Override
     public String  toString(){
-        String salida = "[";
-        for (int i = 0; i < num_Libros; i++) {
-            salida += libros[i];
-            if (i < num_Libros - 1)
-                salida += ","; // Para no poner una coma en el ultimo
-        }
-        salida += "]";
-        return salida;
+        return libros.toString();
     }
 }
